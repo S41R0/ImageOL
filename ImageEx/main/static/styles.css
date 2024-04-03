@@ -1,0 +1,11 @@
+.variable {
+    margin-bottom: 10px;
+}
+.variable label {
+    font-weight: bold;
+}
+.variable p {
+    margin: 5px 0;
+}
+
+
