@@ -39,5 +39,3 @@ def main(request):
 
     return render(request, 'index.html', {'error_message': error_message, 'variable_values': variable_values})
 
-def text(request):
-    return render(request, 'text.html')
