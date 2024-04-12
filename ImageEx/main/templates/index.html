@@ -22,6 +22,7 @@
     <!-- Блок для отображения выбранного изображения -->
     <div id="image_container" style="position: relative;">
         <img id="image_preview" src="#" alt="Image Preview">
+        <button onclick="saveCanvas()">Сохранить изображения с каждым значением переменной</button>
     </div>
 
     <div class="variables">
@@ -37,13 +38,19 @@
         </div>
         {% endfor %}
     </div>
-    <button onclick="saveCanvas()">Сохранить изображение с текстом</button>
-
-    <!-- Добавляем переключатель для выбора положения текста -->
+    <!-- <script>
+        // Получение JSON-строки из шаблона
+        var jsonData = JSON.parse("{{ json_data|escapejs }}");
+    
+        // Теперь jsonData является JavaScript-объектом, который можно использовать
+        console.log(jsonData.key1); // Выведет "value1"
+        console.log(jsonData.key2); // Выведет "value2"
+    </script> -->
+    <div id="variable_values_json">{{ variable_values_json }}</div>
     <h2>Выберите положение текста:</h2>
     <input type="radio" name="text_position" value="horizontal" checked> Горизонтальное
     <input type="radio" name="text_position" value="vertical"> Вертикальное
-    
+    <script src="{% static 'test.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
     <script src="{% static 'scripts.js' %}"></script>
 </body>
