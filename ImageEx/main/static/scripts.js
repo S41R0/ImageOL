@@ -114,8 +114,25 @@ function createVariableText(event, textContent) {
     });
 }
 
-// Функция для сохранения canvas как изображения
-function saveCanvas() {
+var variable_values_json_text;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Получаем JSON-строку из элемента на странице
+    var variable_values_json = document.getElementById('variable_values_json').textContent;
+    
+    // Заменяем значения NaN на null в JSON-строке
+    variable_values_json = variable_values_json.replace(/NaN/g, 'null');
+    
+    // Парсим JSON-строку в объект JavaScript
+    variable_values_json_text = JSON.parse(variable_values_json);
+    
+    // Выводим содержимое объекта в консоль для проверки
+    console.log(variable_values_json_text);
+
+});
+
+
+async function saveCanvas() {
     var canvas = document.createElement('canvas');
     var ctx = canvas.getContext('2d');
     var img = document.getElementById('image_preview');
@@ -124,33 +141,80 @@ function saveCanvas() {
     canvas.width = img.width;
     canvas.height = img.height;
 
-    // Рисуем изображение на canvas
-    ctx.drawImage(img, 0, 0);
+    // Получаем все переменные
+    var variables = document.querySelectorAll('.variables .variable label');
+    var values = document.querySelectorAll('.variables .variable ul');
 
-    // Рисуем все тексты переменных на canvas
-    variableTextsOnCanvas.forEach(function(variableText) {
-        ctx.font = '55px Arial'; // Устанавливаем размер и шрифт текста
-        ctx.fillStyle = '#000000'; // Устанавливаем цвет текста
-        ctx.textBaseline = 'top'; // Устанавливаем базовую линию текста
-        ctx.textAlign = 'left'; // Устанавливаем выравнивание текста
-
-        // Проверяем, нужно ли перевернуть текст переменной
-        if (variableText.style.transform && variableText.style.transform.includes("rotate(-90deg)")) {
-            ctx.translate(variableText.offsetLeft, variableText.offsetTop); // Переводим начало координат к месту текста
-            ctx.rotate(-Math.PI / 2); // Поворачиваем контекст на -90 градусов по часовой стрелке
-            ctx.fillText(variableText.textContent, -120, +35); // Рисуем текст относительно начала координат
-            ctx.rotate(Math.PI / 2); // Возвращаем контекст в исходное положение
-            ctx.translate(-variableText.offsetLeft, -variableText.offsetTop); // Возвращаем начало координат в исходное положение
-        } else {
-            ctx.fillText(variableText.textContent, variableText.offsetLeft, variableText.offsetTop); // Рисуем текст относительно начала координат
+    // Находим переменную с максимальным количеством значений
+    var maxValues = 0;
+    var maxIndex = -1;
+    for (var j = 0; j < variables.length; j++) {
+        if (values[j].querySelectorAll('li').length > maxValues) {
+            maxValues = values[j].querySelectorAll('li').length;
+            maxIndex = j;
         }
-    });
+    }
 
-    // Создаем ссылку для загрузки изображения
-    var link = document.createElement('a');
-    link.download = 'image_with_text.png';
-    link.href = canvas.toDataURL('image/png');
+    // Проверяем, есть ли переменные с значениями
+    if (maxIndex === -1) {
+        alert('Нет переменных с значениями.');
+        return;
+    }
 
-    // Кликаем по ссылке для загрузки изображения
-    link.click();
+    // Создаем объект для хранения значений переменных для первого изображения
+    var valuesForFirstImage = {};
+
+    // Заполняем объект значениями переменных для первого изображения
+    for (var j = 0; j < variables.length; j++) {
+        var value = variable_values_json_text[variables[j].textContent][0]; // Используем только первое значение для всех переменных
+        valuesForFirstImage[variables[j].textContent] = value;
+    }
+
+    // Проходим по каждому изображению
+    for (var i = 0; i < maxValues; i++) {
+        // Рисуем изображение на canvas
+        ctx.drawImage(img, 0, 0);
+
+        // Рисуем тексты переменных на canvas с использованием значений из объекта valuesForFirstImage
+        for (var j = 0; j < variables.length; j++) {
+            // Находим текст переменной на canvas и обновляем его значение
+            var variableText = variableTextsOnCanvas.find(text => text.textContent === variables[j].textContent);
+            if (variableText) {
+                variableText.textContent = valuesForFirstImage[variables[j].textContent];
+            }
+        }
+
+        // Рисуем все тексты переменных на canvas
+        variableTextsOnCanvas.forEach(function(variableText) {
+            ctx.font = '55px Arial'; // Устанавливаем размер и шрифт текста
+            ctx.fillStyle = '#000000'; // Устанавливаем цвет текста
+            ctx.textBaseline = 'top'; // Устанавливаем базовую линию текста
+            ctx.textAlign = 'left'; // Устанавливаем выравнивание текста
+
+            // Проверяем, нужно ли перевернуть текст переменной
+            if (variableText.style.transform && variableText.style.transform.includes("rotate(-90deg)")) {
+                ctx.translate(variableText.offsetLeft, variableText.offsetTop); // Переводим начало координат к месту текста
+                ctx.rotate(-Math.PI / 2); // Поворачиваем контекст на -90 градусов по часовой стрелке
+                ctx.fillText(variableText.textContent, -120, +35); // Рисуем текст относительно начала координат
+                ctx.rotate(Math.PI / 2); // Возвращаем контекст в исходное положение
+                ctx.translate(-variableText.offsetLeft, -variableText.offsetTop); // Возвращаем начало координат в исходное положение
+            } else {
+                ctx.fillText(variableText.textContent, variableText.offsetLeft, variableText.offsetTop); // Рисуем текст относительно начала координат
+            }
+        });
+
+        // Создаем ссылку для загрузки изображения
+        var link = document.createElement('a');
+        link.download = 'image_with_text_' + i + '.png';
+        link.href = canvas.toDataURL('image/png');
+
+        // Кликаем по ссылке для загрузки изображения
+        link.click();
+
+        // Ждем некоторое время перед следующей итерацией, чтобы избежать проблем с загрузкой
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Очищаем холст перед следующей итерацией
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
 }

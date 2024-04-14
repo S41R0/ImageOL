@@ -1,10 +1,16 @@
+import json
 from django.shortcuts import render
 import pandas as pd
 
 def main(request):
     error_message = None
     variable_values = None
+    variable_values_json = None 
 
+# Преобразование словаря в JSON-строку
+
+
+    
     if request.method == 'POST':
         num_variables = int(request.POST.get('num_variables', 0))
         variable_names = []
@@ -31,11 +37,19 @@ def main(request):
                 # Если все переменные есть в столбцах файла Excel, передаем их значения в шаблон
                 else:
                     variable_values = {var: df[var].tolist() for var in variable_names}
-                    print(variable_values)
-                    
+                    variable_values_json = json.dumps(variable_values)
+                    print(variable_values_json)
+                    # json_string = json.dumps(variable_values)
+                    # print(variable_values)
+                    # pass_sl = {}
+                    # for key, value in variable_values.keys(), variable_values.values():
+                        
+                    #     for values in value:
+                            
+                    #         pass_sl.setdefault(key, []).append(str(values))
+                    # print(pass_sl)
 
             except Exception as e:
                 error_message = "Ошибка при обработке файла Excel."
 
-    return render(request, 'index.html', {'error_message': error_message, 'variable_values': variable_values})
-
+    return render(request, 'index.html', {'error_message': error_message, 'variable_values': variable_values, 'variable_values_json': variable_values_json})
