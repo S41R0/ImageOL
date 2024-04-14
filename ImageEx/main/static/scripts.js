@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
     variable_values_json = variable_values_json.replace(/NaN/g, 'null');
     
     // Парсим JSON-строку в объект JavaScript
-    variable_values_json_text = JSON.parse(variable_values_json);
+    var variable_values_json_text = JSON.parse(variable_values_json);
     
     // Выводим содержимое объекта в консоль для проверки
     console.log(variable_values_json_text);

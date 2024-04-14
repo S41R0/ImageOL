@@ -8,4 +8,6 @@
     margin: 5px 0;
 }
 
-
+#variable_values_json {
+    display: none;
+}
